@@ -1,10 +1,19 @@
 package slices
 
+const rateFactor = 2
+
 func Append[T comparable](slice []T, elems ...T) []T {
-	if cap(slice) < len(slice)+len(elems) {
-		newSlice := make([]T, len(slice), (len(slice)+len(elems))*2)
+	newCap := len(slice) + len(elems)
+	if cap(slice) < newCap {
+		if newCap < rateFactor*len(slice) {
+			newCap = rateFactor * len(slice)
+		}
+		newSlice := make([]T, len(slice)+len(elems), newCap)
 		copy(newSlice, slice)
-		return append(newSlice, elems...)
+		copy(newSlice[len(slice):], elems)
+		return newSlice
 	}
-	return append(slice, elems...)
+	slice = slice[:len(slice)+len(elems)]
+	copy(slice[len(slice)-len(elems):], elems)
+	return slice
 }
